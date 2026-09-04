@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Лизингийн гэрээний нөхцөл</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0f1117;color:#e8eaf0;font-family:Arial,sans-serif}
+.wrap{max-width:850px;margin:40px auto;padding:20px}
+.card{background:#181b24;border:1px solid #2b3040;border-radius:16px;padding:28px;box-shadow:0 12px 40px #0005}
+h1{text-align:center;font-size:25px;margin:0 0 25px}
+h2{font-size:18px;color:#8ab4ff;margin-top:28px}
+.terms{line-height:1.7;color:#d7dae3}
+.terms p{margin:10px 0}
+.box{background:#10131a;border:1px solid #303646;border-radius:10px;padding:16px;margin-top:20px}
+label{display:block;margin:10px 0;cursor:pointer}
+input[type=text]{width:100%;padding:12px;border-radius:8px;border:1px solid #3a4050;background:#0c0f14;color:white;font-size:15px}
+canvas{width:100%;height:180px;background:white;border-radius:8px;display:block;touch-action:none}
+.row{display:flex;gap:10px;margin-top:10px}
+button{border:0;border-radius:9px;padding:12px 18px;font-size:15px;cursor:pointer}
+.clear{background:#303646;color:white}
+.submit{background:#5865f2;color:white;width:100%;margin-top:18px;font-weight:bold}
+.submit:disabled{opacity:.45;cursor:not-allowed}
+.notice{text-align:center;color:#9aa2b2;font-size:13px;margin-top:14px}
+#success{display:none;background:#17351f;border:1px solid #2c7140;color:#b9f5c6;padding:14px;border-radius:9px;margin-top:15px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="card">
+<h1>ЛИЗИНГИЙН ГЭРЭЭНИЙ НӨХЦӨЛ</h1>
+
+<h2>ТӨЛБӨРИЙН ХУГАЦАА, ХОЦРОЛТЫН НӨХЦӨЛ</h2>
+<div class="terms">
+<p>Лизинг авагч нь сар бүрийн төлбөрийг гэрээнд заасан хугацаанд бүрэн төлөх үүрэгтэй.</p>
+<p>Сар бүрийн төлбөрийг төлөх хугацаанаас 7 хоног хүртэл хэтрүүлсэн тохиолдолд лизинг авагчид төлбөрөө нөхөн төлөх боломж олгоно.</p>
+<p>Төлбөрийн хугацаа 7 хоногоос хэтэрсэн тохиолдолд лизингийн автомашиныг түр хугацаагаар хураан авч, лизингийн төлөлт болон гэрээний нөхцөлийг шалгана.</p>
+<p>Автомашиныг хураан авснаас хойш дахин 7 хоногийн дотор лизинг авагч төлөгдөөгүй төлбөрөө нөхөн төлөөгүй тохиолдолд тухайн автомашиныг буцаан олголтгүйгээр бүр мөсөн хураан авч, лизингийн гэрээг цуцална.</p>
+<p>Автомашиныг хураан авсан тохиолдолд лизинг авагч нь тухайн автомашиныг буцаан шаардах эрхгүй бөгөөд гэрээнд заасан бусад үүрэг, төлбөрийг барагдуулах нөхцөл үйлчилнэ.</p>
+</div>
+
+<h2>ЛИЗИНГИЙН ҮНДСЭН НӨХЦӨЛ</h2>
+<div class="terms">
+<p><b>Урьдчилгаа төлбөр:</b> 30%</p>
+<p><b>Лизингийн хугацаа:</b> 3 сар</p>
+<p><b>Төлбөрийн валют:</b> Ам.доллар</p>
+<p>Сар бүрийн төлбөрийг гэрээнд заасан хугацаанд төлнө.</p>
+</div>
+
+<div class="box">
+<label><input id="agree" type="checkbox"> Дээрх нөхцөлийг бүрэн уншиж, ойлгон зөвшөөрч байна.</label>
+<label for="fullname">Овог, нэр</label>
+<input id="fullname" type="text" placeholder="Овог, нэрээ оруулна уу">
+
+<p>Гарын үсэг:</p>
+<canvas id="signature"></canvas>
+<div class="row"><button class="clear" id="clear">Гарын үсгийг цэвэрлэх</button></div>
+
+<button class="submit" id="submit" disabled>ЗӨВШӨӨРЧ, ГАРЫН ҮСЭГ ЗУРАХ</button>
+<div id="success">Гэрээний нөхцөлийг зөвшөөрсөн мэдээлэл бүртгэгдлээ.</div>
+<p class="notice">Анхаарах: Энэ демо хувилбар мэдээллийг серверт хадгалахгүй.</p>
+</div>
+</div>
+</div>
+
+<script>
+const canvas=document.getElementById('signature');
+const ctx=canvas.getContext('2d');
+let drawing=false, hasSignature=false;
+
+function resize(){
+  const ratio=window.devicePixelRatio||1;
+  const rect=canvas.getBoundingClientRect();
+  const old=canvas.toDataURL();
+  canvas.width=rect.width*ratio; canvas.height=rect.height*ratio;
+  ctx.scale(ratio,ratio);
+  ctx.lineWidth=2; ctx.lineCap='round'; ctx.strokeStyle='#111';
+}
+resize(); window.addEventListener('resize',resize);
+
+function pos(e){
+ const r=canvas.getBoundingClientRect();
+ const t=e.touches?e.touches[0]:e;
+ return {x:t.clientX-r.left,y:t.clientY-r.top};
+}
+function start(e){drawing=true;hasSignature=true;ctx.beginPath();const p=pos(e);ctx.moveTo(p.x,p.y);e.preventDefault()}
+function move(e){if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();e.preventDefault()}
+function end(){drawing=false}
+canvas.addEventListener('mousedown',start);canvas.addEventListener('mousemove',move);window.addEventListener('mouseup',end);
+canvas.addEventListener('touchstart',start,{passive:false});canvas.addEventListener('touchmove',move,{passive:false});canvas.addEventListener('touchend',end);
+
+document.getElementById('clear').onclick=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);hasSignature=false;check()};
+const agree=document.getElementById('agree'), name=document.getElementById('fullname'), submit=document.getElementById('submit');
+function check(){submit.disabled=!(agree.checked && name.value.trim() && hasSignature)}
+agree.onchange=check;name.oninput=check;
+submit.onclick=()=>{
+ document.getElementById('success').style.display='block';
+ submit.textContent='ЗӨВШӨӨРСӨН ✓'; submit.disabled=true;
+};
+</script>
+</body>
+</html>
